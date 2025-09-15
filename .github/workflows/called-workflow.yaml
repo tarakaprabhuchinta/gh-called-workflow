@@ -1,0 +1,40 @@
+name: Github called workflow
+run-name: Called workflow demo
+on:
+  workflow_call:
+
+    inputs:
+      greeting:
+        required: true
+        type: string
+    secrets:
+      token:
+        required: true
+
+    outputs:
+      modified-greeting:
+        description: "modified greeting from the calling workflow"
+        value: ${{ jobs.called-workflow-job.outputs.output1 }}
+      passed-secret:
+        description: "secret send from the calling workflow"
+        value: ${{ jobs.called-workflow-job.outputs.output2 }}
+
+jobs:
+  called-workflow-job:
+    runs-on: ubuntu-latest 
+    outputs:
+      output1: ${{ steps.process-input-greeting.outputs.modified-greeting }}
+      output2: ${{ steps.process-input-token.outputs.passed-secret }}
+    steps:
+
+      - name: Process input greeting
+        id: process-input-greeting
+        run: |
+            echo "modified-greeting=${{ inputs.greeting }} world" >> $GITHUB_OUTPUT
+
+      - name: Process input token
+        id: process-input-token
+        run: |
+             echo "passed-secret=$(echo '${{ secrets.token }}' | rev)" >> $GITHUB_OUTPUT      
+       
+     
